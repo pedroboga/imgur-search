@@ -8,10 +8,15 @@
 import Foundation
 
 struct ImgurResponse: Decodable {
-    let data: [Image]
+    let data: [Data]
+}
+
+struct Data: Decodable {
+    //let title: String
+    let link: String
+    var images: [Image]?
 }
 
 struct Image: Decodable, Hashable {
-    let title: String
-    let link: String
+    let link: String?
 }

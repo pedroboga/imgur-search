@@ -12,13 +12,16 @@ class Service {
     
     static let shared = Service()
     let cache = NSCache<NSString, UIImage>()
-    var clientId = ""
+    
+    var clientId = "Client-ID 1ceddedc03a5d71"
     
     private init() {
     }
     
-    func fetchImages(for query: String, _ completion: @escaping ([Image]?) -> Void) {
-        guard let url = URL(string: "https://api.imgur.com/3/gallery/search/?q=\(query)&q_type=jpeg") else { return }
+    //func fetchImages(for query: String, _ completion: @escaping ([Data]?) -> Void) {
+    func fetchImages(for query: String) -> [Data] {
+        guard let url = URL(string: "https://api.imgur.com/3/gallery/search/?q=\(query)&q_type=jpeg&page=1") else { return [Data]()}
+        var dataArray = [Data]()
         var request = URLRequest(url: url)
         request.setValue(clientId, forHTTPHeaderField: "Authorization")
         request.httpMethod = "GET"
@@ -26,7 +29,6 @@ class Service {
         let dataTask = URLSession.shared.dataTask(with: request as URLRequest) { data, response, error in
             
             if let _ = error {
-                completion(nil)
                 return
             }
             
@@ -34,13 +36,13 @@ class Service {
                 let jsonDecodable = JSONDecoder()
                 do {
                     let decode = try jsonDecodable.decode(ImgurResponse.self, from: data)
-                    completion(decode.data)
+                    dataArray = decode.data
                 } catch {
                     print(error)
-                    completion(nil)
                 }
             }
         }
         dataTask.resume()
+        return dataArray
     }
 }

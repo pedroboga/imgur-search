@@ -11,12 +11,13 @@ class ImageCollectionViewCell: UICollectionViewCell {
     static let reuseId = "ImageCell"
     let cache = Service.shared.cache
     
-    let imageView: UIImageView = {
+    private let imageView: UIImageView = {
         var image = UIImageView()
         image.layer.cornerRadius = 12
         image.clipsToBounds = true
         image.backgroundColor = .systemGray
-        image.translatesAutoresizingMaskIntoConstraints = false
+        image.contentMode = .scaleAspectFill
+        //image.translatesAutoresizingMaskIntoConstraints = false
         
         
         
@@ -25,7 +26,8 @@ class ImageCollectionViewCell: UICollectionViewCell {
     
     override init(frame: CGRect){
         super.init(frame: frame)
-        configureCell()
+        self.addSubview(imageView)
+        //configureCell()
     }
     
     required init?(coder: NSCoder) {
@@ -33,29 +35,27 @@ class ImageCollectionViewCell: UICollectionViewCell {
     }
     
     private func configureCell() {
-        addSubview(imageView)
+        //addSubview(imageView)
         
         NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: self.topAnchor, constant: 4),
-            imageView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 4),
-            imageView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -4),
+            imageView.topAnchor.constraint(equalTo: self.topAnchor, constant: 2),
+            imageView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 2),
+            imageView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -2),
             imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor)
         ])
     }
     
-    func set(image: Image) {
-        downloadImage(from: image.link)
-    }
-    
     func setImage(with urlString: String) {
         guard let url = URL(string: urlString) else { return }
-        let task = URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+        let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self else { return }
             guard let data = data, error == nil else {
                 return
             }
+            //let image = UIImage(data: data)
             DispatchQueue.main.async {
                 let image = UIImage(data: data)
-                self?.imageView.image = image
+                self.imageView.image = image
             }
         }
         task.resume()
@@ -78,7 +78,7 @@ class ImageCollectionViewCell: UICollectionViewCell {
             return
         }
         guard let url = URL(string: urlString) else { return }
-        
+
         let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
             guard let self = self else { return }
             if error != nil { return }
