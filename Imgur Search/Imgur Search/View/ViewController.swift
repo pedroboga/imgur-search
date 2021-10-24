@@ -19,31 +19,25 @@ class ViewController: UIViewController {
     var clientId = "Client-ID 1ceddedc03a5d71"
     
     let searchbar = UISearchController()
-//
+    var queryText = "corinthians"
+    var pageCount = 1
+    var moreResults = true
+
     private var imageCollectionView: UICollectionView?
     
-//    lazy var imageCollection: UICollectionView = {
-//        var collection = UICollectionView(frame: .zero, collectionViewLayout: configureFlow())
-//        collection.backgroundColor = .systemBackground
-//        collection.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: ImageCollectionViewCell.reuseId)
-//
-//        return collection
-//
-//    }()
-    
-    //var dataSource: UICollectionViewDiffableDataSource<Section, Image>!
+    //var dataSource: UICollectionViewDiffableDataSource<Section, Data>!
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
         configureSearchBar()
         configureView()
-        fetchImages(for: "lula")
+        fetchImages(for: queryText, page: pageCount)
         
     }
     
-    func fetchImages(for query: String) {
-        guard let url = URL(string: "https://api.imgur.com/3/gallery/search/?q=\(query)&q_type=jpeg&page=1") else { return }
+    func fetchImages(for query: String, page: Int) {
+        guard let url = URL(string: "https://api.imgur.com/3/gallery/search/?q=\(query)&q_type=jpeg&page=\(page)") else { return }
         var request = URLRequest(url: url)
         request.setValue(clientId, forHTTPHeaderField: "Authorization")
         request.httpMethod = "GET"
@@ -53,13 +47,14 @@ class ViewController: UIViewController {
             if let _ = error {
                 return
             }
-            
+
             if let data = data {
                 let jsonDecodable = JSONDecoder()
                 do {
                     let decode = try jsonDecodable.decode(ImgurResponse.self, from: data)
                     DispatchQueue.main.async {
-                        self.images = decode.data
+                        //if self.images.count < 100 { self.moreResults = false }
+                        self.images.append(contentsOf: decode.data)
                         self.imageCollectionView?.reloadData()
                     }
                 } catch {
@@ -68,7 +63,7 @@ class ViewController: UIViewController {
             }
         }
         dataTask.resume()
-    }
+   }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -101,6 +96,25 @@ class ViewController: UIViewController {
         flowLayout.itemSize = CGSize(width: itemWidth, height: itemWidth)
         return flowLayout
     }
+    
+//    private func configureDataSource() {
+//        dataSource = UICollectionViewDiffableDataSource<Section, Data>(collectionView: imageCollectionView!, cellProvider: { (collectionView, indexPath, itemIdentifier) -> UICollectionViewCell? in
+//            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCollectionViewCell.reuseId, for: indexPath) as! ImageCollectionViewCell
+//            //cell.downloadImage(from: self.images[indexPath.row].link)
+//            cell.downloadImage(from: itemIdentifier.link)
+//            return cell
+//        })
+//    }
+    
+//    func updateData() {
+//        var snapshot = NSDiffableDataSourceSnapshot<Section, Data>()
+//        snapshot.appendSections([.main])
+//        snapshot.appendItems(images)
+//        DispatchQueue.main.async {
+//            self.dataSource.apply(snapshot, animatingDifferences: true)
+//        }
+//    }
+    
 }
 
 extension ViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
@@ -114,13 +128,39 @@ extension ViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDa
         cell.downloadImage(from: imageUrlString)
         return cell
     }
-
 }
 
 extension ViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let text = searchController.searchBar.text else { return }
-        fetchImages(for: text)
-        imageCollectionView?.reloadData()
+        queryText = text
+        images = []
+        pageCount = 1
+        fetchImages(for: queryText, page: pageCount)
+        //self.updateData()
+        self.imageCollectionView?.reloadData()
     }
+}
+
+extension ViewController: UICollectionViewDelegate {
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let height = scrollView.frame.size.height
+        
+        if offsetY > contentHeight - height {
+            //guard moreResults else { return }
+            pageCount += 1
+            fetchImages(for: queryText, page: pageCount)
+            self.imageCollectionView?.reloadData()
+        }
+    }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let destVc = ImageDetailViewController()
+        let navCont = UINavigationController(rootViewController: destVc)
+        destVc.imageTitle = images[indexPath.row].title
+        destVc.imageUrl = images[indexPath.row].link
+        present(navCont, animated: true)
+    }
+    
 }

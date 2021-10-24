@@ -13,12 +13,8 @@ class ImageViewModel {
     var images: [Data] = []
     
     func fetchImages(for query: String) -> [Data] {
-        Service.shared.fetchImages(for: query)
-            //guard let self = self else { return }
-            
-            //guard let images = imageData else { return }
-            //self.images = images
-        
+            Service.shared.fetchImages(for: query) 
+       
         
         return images
     }

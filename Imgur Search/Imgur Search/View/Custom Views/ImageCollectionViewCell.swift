@@ -17,48 +17,16 @@ class ImageCollectionViewCell: UICollectionViewCell {
         image.clipsToBounds = true
         image.backgroundColor = .systemGray
         image.contentMode = .scaleAspectFill
-        //image.translatesAutoresizingMaskIntoConstraints = false
-        
-        
-        
         return image
     }()
     
     override init(frame: CGRect){
         super.init(frame: frame)
         self.addSubview(imageView)
-        //configureCell()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func configureCell() {
-        //addSubview(imageView)
-        
-        NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: self.topAnchor, constant: 2),
-            imageView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 2),
-            imageView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -2),
-            imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor)
-        ])
-    }
-    
-    func setImage(with urlString: String) {
-        guard let url = URL(string: urlString) else { return }
-        let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let self = self else { return }
-            guard let data = data, error == nil else {
-                return
-            }
-            //let image = UIImage(data: data)
-            DispatchQueue.main.async {
-                let image = UIImage(data: data)
-                self.imageView.image = image
-            }
-        }
-        task.resume()
     }
     
     override func layoutSubviews() {

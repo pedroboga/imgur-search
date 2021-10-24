@@ -11,12 +11,13 @@ struct ImgurResponse: Decodable {
     let data: [Data]
 }
 
-struct Data: Decodable {
-    //let title: String
+struct Data: Decodable, Hashable {
+    let title: String
     let link: String
     var images: [Image]?
 }
 
 struct Image: Decodable, Hashable {
+    let title: String?
     let link: String?
 }
