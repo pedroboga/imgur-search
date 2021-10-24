@@ -6,21 +6,12 @@
 //
 
 import Foundation
-import UIKit
 
-class Service {
-    
-    static let shared = Service()
-    let cache = NSCache<NSString, UIImage>()
-    var clientId = ""
-    
-    private init() {
-    }
-    
-    func fetchImages(for query: String, _ completion: @escaping ([Image]?) -> Void) {
-        guard let url = URL(string: "https://api.imgur.com/3/gallery/search/?q=\(query)&q_type=jpeg") else { return }
+struct Service {
+    func fetchImages(_ completion: @escaping (ImgurResponse?) -> Void) {
+        guard let url = URL(string: "https://api.imgur.com/3/gallery/search/viral/?q=cats") else { return }
         var request = URLRequest(url: url)
-        request.setValue(clientId, forHTTPHeaderField: "Authorization")
+        request.setValue("Client-ID ", forHTTPHeaderField: "Authorization")
         request.httpMethod = "GET"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         let dataTask = URLSession.shared.dataTask(with: request as URLRequest) { data, response, error in
@@ -33,8 +24,8 @@ class Service {
             if let data = data {
                 let jsonDecodable = JSONDecoder()
                 do {
-                    let decode = try jsonDecodable.decode(ImgurResponse.self, from: data)
-                    completion(decode.data)
+                    let imagens = try jsonDecodable.decode(ImgurResponse.self, from: data)
+                    completion(imagens)
                 } catch {
                     print(error)
                     completion(nil)
@@ -43,4 +34,28 @@ class Service {
         }
         dataTask.resume()
     }
+    
 }
+
+
+// let request = NSMutableURLRequest(url: url! as URL)
+// request.setValue("Client-ID 1ceddedc03a5d71", forHTTPHeaderField: "Authorization") //**
+// request.httpMethod = "GET"
+// request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+// let session = URLSession.shared
+//
+// let mData = session.dataTask(with: request as URLRequest) { (data, response, error) -> Void in
+//     if let data = data {
+//         print(data)
+//     }
+//
+//     if let res = response as? HTTPURLResponse {
+//         //print("res: \(String(describing: res))")
+//         //print("Response: \(String(describing: response))")
+//     }else{
+//         print("Error: \(String(describing: error))")
+//     }
+// }
+// mData.resume()
+//
+                                                                                    
