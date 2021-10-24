@@ -7,12 +7,11 @@
 
 import Foundation
 
-struct ImgurResponse: Codable {
-    let data: [Images]
+struct ImgurResponse: Decodable {
+    let data: [Image]
 }
 
-struct Images: Codable {
+struct Image: Decodable, Hashable {
     let title: String
     let link: String
 }
-
