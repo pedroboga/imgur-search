@@ -13,7 +13,7 @@ class Service {
     static let shared = Service()
     let cache = NSCache<NSString, UIImage>()
     
-    var clientId = "Client-ID 1ceddedc03a5d71"
+    var clientId = ""
     var images = [Data]()
     private init() {
     }

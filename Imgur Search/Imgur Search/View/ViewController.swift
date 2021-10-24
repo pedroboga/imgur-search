@@ -16,7 +16,7 @@ class ViewController: UIViewController {
     //let viewModel = ImageViewModel()
     var images = [Data]()
     
-    var clientId = "Client-ID 1ceddedc03a5d71"
+    var clientId = ""
     
     let searchbar = UISearchController()
     var queryText = "corinthians"
